@@ -82,9 +82,9 @@ def create_train_test_set(prefix_dir,uuids,tuuids):
 
 #my directories
 #top level directory of extrasensory dataset
-extra_sensory_folder = "";
+extra_sensory_folder = "../data/";
 #subdirectory containing the preextracted features
-puuid_features = "../data";
+puuid_features = "ExtraSensory.per_uuid_features_labels/";
 
 #a common test set (size is 16 of 56)
 test_uuids = ['0BFC35E2-4817-4865-BFA7-764742302A2D',
