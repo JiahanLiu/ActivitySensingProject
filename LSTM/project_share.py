@@ -180,25 +180,23 @@ else:
     ytst = np.load(persistent_filenames[4]+".npy")
     mtst = np.load(persistent_filenames[5]+".npy")
 
-print(xtrn.shape)
-print(ytrn.shape)
-
 trainSet = np.append(xtrn, ytrn, axis=1)
-
-print(trainSet.shape)
 
 # convert to csv to check
 # xtrn_df = pd.DataFrame(xtrn[0:100])
 # ytrn_df = pd.DataFrame(ytrn[0:100])
-train_df = pd.DataFrame(trainSet[0:100])
+#train_df = pd.DataFrame(trainSet[0:100])
 # xtrn_df.to_csv("xtrn.csv")
 # ytrn_df.to_csv("ytrn.csv")
-train_df.to_csv("train.csv")
+#train_df.to_csv("train.csv")
 
-
-def series_to_supervised(data, n_in=1, n_out=1):
+#data: x and y (all the data)
+#labels: y (just the labels)
+def series_to_supervised(data, labels, n_in=1, n_out=1):
     n_vars = 1 if type(data) is list else data.shape[1]
+    n_vars_label = 1 if type(labels) is list else labels.shape[1]
     df = DataFrame(data)
+    df_label = DataFrame(labels)
     cols, names = list(), list()
     # input sequence (t-n, ... t-1)
     for i in range(n_in, 0, -1):
@@ -206,14 +204,31 @@ def series_to_supervised(data, n_in=1, n_out=1):
         names += [('var%d(t-%d)' % (j+1, i)) for j in range(n_vars)]
     # forecast sequence (t, t+1, ... t+n)
     for i in range(0, n_out):
-        cols.append(df.shift(-i))
+        cols.append(df_label.shift(-i))
         if i == 0:
-            names += [('var%d(t)' % (j+1)) for j in range(n_vars)]
+            names += [('var%d(t)' % (j+1)) for j in range(n_vars_label)]
         else:
-            names += [('var%d(t+%d)' % (j+1, i)) for j in range(n_vars)]
+            names += [('var%d(t+%d)' % (j+1, i)) for j in range(n_vars_label)]
     # put it all together
     agg = concat(cols, axis=1)
     agg.columns = names
     return agg
+
+time_series_train = series_to_supervised(trainSet, ytrn, 1, 1);
+
+print(xtrn.shape)
+print(ytrn.shape)
+print(trainSet.shape)
+print(time_series_train.shape)
+
+# convert to csv to check
+# xtrn_df = pd.DataFrame(xtrn[0:100])
+# ytrn_df = pd.DataFrame(ytrn[0:100])
+#train_df = pd.DataFrame(trainSet[0:100])
+time_series_train_df = pd.DataFrame(time_series_train[0:100])
+# xtrn_df.to_csv("xtrn.csv")
+# ytrn_df.to_csv("ytrn.csv")
+#train_df.to_csv("train.csv")
+time_series_train_df.to_csv("time_series_train.csv")
 
 print("end data loading")
