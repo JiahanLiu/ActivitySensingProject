@@ -215,6 +215,7 @@ def series_to_supervised(data, labels, n_in=1, n_out=1):
     return agg
 
 time_series_train = series_to_supervised(trainSet, ytrn, 1, 1);
+time_series_train.drop(time_series_train.index[0])
 
 print(xtrn.shape)
 print(ytrn.shape)
@@ -225,7 +226,7 @@ print(time_series_train.shape)
 # xtrn_df = pd.DataFrame(xtrn[0:100])
 # ytrn_df = pd.DataFrame(ytrn[0:100])
 #train_df = pd.DataFrame(trainSet[0:100])
-time_series_train_df = pd.DataFrame(time_series_train[0:100])
+time_series_train_df = time_series_train[0:100]
 # xtrn_df.to_csv("xtrn.csv")
 # ytrn_df.to_csv("ytrn.csv")
 #train_df.to_csv("train.csv")
