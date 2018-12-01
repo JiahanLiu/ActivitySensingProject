@@ -180,10 +180,21 @@ else:
     ytst = np.load(persistent_filenames[4]+".npy")
     mtst = np.load(persistent_filenames[5]+".npy")
 
-xtrn_df = pd.DataFrame(xtrn[0:100])
-ytrn_df = pd.DataFrame(ytrn[0:100])
-xtrn_df.to_csv("xtrn.csv")
-ytrn_df.to_csv("ytrn.csv")
+print(xtrn.shape)
+print(ytrn.shape)
+
+trainSet = np.append(xtrn, ytrn, axis=1)
+
+print(trainSet.shape)
+
+# convert to csv to check
+# xtrn_df = pd.DataFrame(xtrn[0:100])
+# ytrn_df = pd.DataFrame(ytrn[0:100])
+train_df = pd.DataFrame(trainSet[0:100])
+# xtrn_df.to_csv("xtrn.csv")
+# ytrn_df.to_csv("ytrn.csv")
+train_df.to_csv("train.csv")
+
 
 def series_to_supervised(data, n_in=1, n_out=1):
     n_vars = 1 if type(data) is list else data.shape[1]
