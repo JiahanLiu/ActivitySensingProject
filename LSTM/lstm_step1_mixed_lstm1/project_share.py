@@ -249,7 +249,7 @@ for fname in persistent_timeSeries:
     if not os.path.isfile(fname+".npy"):
         need_time_series = True
         break 
-         
+need_time_series = True
 #if out of memory, do the training, and testing set seperately
 if loaded_from_gz:
     print("loading from gx files")
