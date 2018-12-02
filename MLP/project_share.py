@@ -160,7 +160,7 @@ for fname in persistent_filenames:
         break
         
 if loaded_from_gz:
-    print("loading from gx files")
+    print("loading from gz files")
     (xtrn,ytrn,mtrn,xtst,ytst,mtst) = create_train_test_set(data_dir + puuid_features_dir, all_uuids,test_uuids)
     np.save(persistent_filenames[0], xtrn)
     np.save(persistent_filenames[1], ytrn)
