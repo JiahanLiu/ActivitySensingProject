@@ -160,8 +160,8 @@ def create_time_series(xtrn, ytrn, xtst, ytst):
     # data: x and y (all the data)
     # labels: y (just the labels)
 
-    # scaler = MinMaxScaler(feature_range=(0,1))
-    # scaled_trainSet = scaler.fit_transform(trainSet)
+    scaler = MinMaxScaler(feature_range=(0,1))
+    scaled_trainSet = scaler.fit_transform(trainSet)
 
     #creates a (271088, 277 complete time series)
     time_series_train = series_to_supervised(trainSet, ytrn, 1, 1);
@@ -249,7 +249,7 @@ for fname in persistent_timeSeries:
     if not os.path.isfile(fname+".npy"):
         need_time_series = True
         break 
-need_time_series=True
+         
 #if out of memory, do the training, and testing set seperately
 if loaded_from_gz:
     print("loading from gx files")
