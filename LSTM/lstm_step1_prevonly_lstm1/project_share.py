@@ -166,11 +166,11 @@ def create_time_series(xtrn, ytrn, xtst, ytst):
     # data: x and y (all the data)
     # labels: y (just the labels)
 
-    # scaler = MinMaxScaler(feature_range=(0,1))
-    # scaled_trainSet = scaler.fit_transform(trainSet)
+    scaler = MinMaxScaler(feature_range=(0,1))
+    scaled_trainSet = scaler.fit_transform(trainSet)
 
     #creates a (271088, 277 complete time series)
-    time_series_train = series_to_supervised(trainSet, ytrn, 1, 1);
+    time_series_train = series_to_supervised(scaled_trainSet, ytrn, 1, 1);
     time_series_test = series_to_supervised(testSet, ytst, 1, 1);
 
     # first row doesnt have a t-1
@@ -179,13 +179,13 @@ def create_time_series(xtrn, ytrn, xtst, ytst):
 
     # print(xtrn.shape)
     # print(ytrn.shape)
-    # print(trainSet.shape)
+    # print(scaled_trainSet.shape)
     # print(time_series_train.shape)
 
     # convert to csv to check
     # xtrn_df = pd.DataFrame(xtrn[0:100])
     # ytrn_df = pd.DataFrame(ytrn[0:100])
-    # train_df = pd.DataFrame(trainSet[0:100])
+    # train_df = pd.DataFrame(scaled_trainSet[0:100])
     # time_series_train_df = time_series_train[0:100]
     # xtrn_df.to_csv("xtrn.csv")
     # ytrn_df.to_csv("ytrn.csv")
@@ -256,7 +256,6 @@ for fname in persistent_timeSeries:
         need_time_series = True
         break 
 
-loaded_from_gz=True
 #if out of memory, do the training, and testing set seperately
 if loaded_from_gz:
     print("loading from gx files")
