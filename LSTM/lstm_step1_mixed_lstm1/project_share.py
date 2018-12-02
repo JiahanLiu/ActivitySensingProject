@@ -139,6 +139,13 @@ def series_to_supervised(data, labels, n_in=1, n_out=1):
     for i in range(n_in, -1, -1):
         cols.append(df.shift(i))
         names += [('var%d(t-%d)' % (j+1, i)) for j in range(n_vars)]
+    # forecast sequence (t, t+1, ... t+n)
+    for i in range(0, n_out):
+        cols.append(df_label.shift(-i))
+        if i == 0:
+            names += [('var%d(t)' % (j+1)) for j in range(n_vars_label)]
+        else:
+            names += [('var%d(t+%d)' % (j+1, i)) for j in range(n_vars_label)]
     # put it all together
     agg = concat(cols, axis=1)
     agg.columns = names
@@ -146,8 +153,8 @@ def series_to_supervised(data, labels, n_in=1, n_out=1):
 
 def create_time_series(xtrn, ytrn, xtst, ytst):
     #combine for a universal set to follow machinelearningmastery tutorial
-    trainSet = np.append(xtrn, ytrn, axis=1)
-    testSet = np.append(xtst, ytst, axis=1)
+    trainSet = xtrn
+    testSet = xtst
 
     # convert to csv to check
     # xtrn_df = pd.DataFrame(xtrn[0:100])
@@ -249,7 +256,7 @@ for fname in persistent_timeSeries:
     if not os.path.isfile(fname+".npy"):
         need_time_series = True
         break 
-        
+need_time_series = True        
 #if out of memory, do the training, and testing set seperately
 if loaded_from_gz:
     print("loading from gx files")
