@@ -18,11 +18,11 @@ picks a random set of uuids from uuids.
 NOTE: it could pick the same uuid twice
 might fix with np.unique 
 """
-def pick_test_uuids(uuids, num_tests):
-    picks = np.floor(np.random.rand(num_tests) * (len(uuids)+1))
-    picks = picks.astype(int)
-    np_uuids = np.array(uuids)
-    return uuids[picks]
+# def pick_test_uuids(uuids, num_tests):
+#     picks = np.floor(np.random.rand(num_tests) * (len(uuids)+1))
+#     picks = picks.astype(int)
+#     np_uuids = np.array(uuids)
+#     return uuids[picks]
 
 """
 outputs the training loading from the provided prefix dir
@@ -110,7 +110,7 @@ class Project_Metrics(Callback):
     def on_train_begin(self, logs={}):
         self._data = []
         self._detailed_data = []
-        self.validation_data = [xtst,ytst]
+        self.validation_data = [test_X,test_Y]
 
     def on_epoch_end(self, batch, logs={}):
         xval = self.validation_data[0]
@@ -192,21 +192,22 @@ def create_time_series(xtrn, ytrn, xtst, ytst):
     # train_df.to_csv("train.csv")
     # time_series_train_df.to_csv("time_series_train.csv")
 
+    return (time_series_train, time_series_test)
+
+def reshape_time_series(time_series_train, time_series_test):
     time_series_train_np = time_series_train.values
     time_series_test_np = time_series_test.values
 
-    train_X, train_Y = time_series_train_np[:, :-51], time_series_train_np[:,-51]
-    test_X, test_Y = time_series_test_np[:, :-51], time_series_test_np[:,-51]
+    train_X, train_Y = time_series_train_np[:, :-51], time_series_train_np[:,-51:]
+    test_X, test_Y = time_series_test_np[:, :-51], time_series_test_np[:,-51:]
 
-    # print(train_X.shape, train_Y.shape, test_X.shape, test_Y.shape)
+    print(train_X.shape, train_Y.shape, test_X.shape, test_Y.shape)
 
     train_X = train_X.reshape((train_X.shape[0], 1, train_X.shape[1]))
     test_X = test_X.reshape((test_X.shape[0], 1, test_X.shape[1]))
 
     # print(train_X.shape, train_Y.shape, test_X.shape, test_Y.shape)
 
-    train_X = 0
-    train_Y = 0
     return (train_X, train_Y, test_X, test_Y)
 
 #
@@ -242,35 +243,56 @@ for idx,str in enumerate(all_uuids):
 
 print("Begin data loading")
 loaded_from_gz=False
+need_time_series=False
 persistent_filenames = ["xtrn_persistent","ytrn_persistent","mtrn_persistent","xtst_persistent","ytst_persistent","mtst_persistent"]
 persistent_timeSeries = ["train_X", "train_Y", "test_X", "test_Y"]
-for fname in persistent_timeSeries:
+
+for fname in persistent_filenames:
     if not os.path.isfile(fname+".npy"):
         loaded_from_gz = True
-        break      
+        break   
+for fname in persistent_timeSeries:
+    if not os.path.isfile(fname+".npy"):
+        need_time_series = True
+        break 
 
 #if out of memory, do the training, and testing set seperately
 if loaded_from_gz:
-    print("loading from gz files")
+    print("loading from gx files")
     (xtrn,ytrn,mtrn,xtst,ytst,mtst) = create_train_test_set(data_dir + puuid_features_dir, all_uuids,test_uuids)
-    # xtrn = np.load(persistent_filenames[0]+".npy")
-    # ytrn = np.load(persistent_filenames[1]+".npy")
-    # mtrn = np.load(persistent_filenames[2]+".npy")
-    # xtst = np.load(persistent_filenames[3]+".npy")
-    # ytst = np.load(persistent_filenames[4]+".npy")
-    # mtst = np.load(persistent_filenames[5]+".npy")
-    (train_X, train_Y, test_X, test_Y) = create_time_series(xtrn, ytrn, xtst, ytst)
+    np.save(persistent_filenames[0], xtrn)
+    np.save(persistent_filenames[1], ytrn)
+    np.save(persistent_filenames[2], mtrn)
+    np.save(persistent_filenames[3], xtst)
+    np.save(persistent_filenames[4], ytst)
+    np.save(persistent_filenames[5], mtst)
+else:
+    print("loading from presaved files")
+    if need_time_series:
+        xtrn = np.load(persistent_filenames[0]+".npy")
+        ytrn = np.load(persistent_filenames[1]+".npy")
+        xtst = np.load(persistent_filenames[3]+".npy")
+        ytst = np.load(persistent_filenames[4]+".npy")
+    mtrn = np.load(persistent_filenames[2]+".npy")
+    mtst = np.load(persistent_filenames[5]+".npy")
+
+if need_time_series:
+    print("doing time series")
+    (time_series_train, time_series_test) = create_time_series(xtrn, ytrn, xtst, ytst)
+    (train_X, train_Y, test_X, test_Y) = reshape_time_series(time_series_train, time_series_test)
     np.save(persistent_timeSeries[0], train_X)
     np.save(persistent_timeSeries[1], train_Y)
     np.save(persistent_timeSeries[2], test_X)
     np.save(persistent_timeSeries[3], test_Y)
 else:
-    print("loading from presaved files")
+    print("loading time series")
     train_X = np.load(persistent_timeSeries[0]+".npy")
     train_Y = np.load(persistent_timeSeries[1]+".npy")
     test_X = np.load(persistent_timeSeries[2]+".npy")
     test_Y = np.load(persistent_timeSeries[3]+".npy")
-    print(train_X.shape, train_Y.shape, test_X.shape, test_Y.shape)
+    # print(train_X.shape, train_Y.shape, test_X.shape, test_Y.shape)
 
+print("training/testing x/y shapes")
+print(train_X.shape, train_Y.shape, test_X.shape, test_Y.shape)
 
 print("end data loading")
