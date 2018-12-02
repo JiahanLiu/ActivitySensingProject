@@ -5,6 +5,7 @@ from extrasensory_lib import *
 from pandas import DataFrame
 from pandas import concat
 import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
 
 """
 nobody needs to use this.
@@ -78,7 +79,7 @@ def create_train_test_set(prefix_dir,uuids,tuuids):
     
     return (x_trn,y_trn,m_trn,x_tst,y_tst,m_tst)
 
-#class Project_Metrics(keras.callbacks.Callback):
+# class Project_Metrics(keras.callbacks.Callback):
 class Project_Metrics(Callback):
     def __init__(self, test_mask):
         self.test_mask = test_mask
@@ -126,6 +127,91 @@ class Project_Metrics(Callback):
     def get_detailed_data(self):
         return self._detailed_data
 
+
+def series_to_supervised(data, labels, n_in=1, n_out=1):
+    n_vars = 1 if type(data) is list else data.shape[1]
+    n_vars_label = 1 if type(labels) is list else labels.shape[1]
+    df = DataFrame(data)
+    df_label = DataFrame(labels)
+    cols, names = list(), list()
+    # input sequence (t-n, ... t-1)
+    for i in range(n_in, 0, -1):
+        cols.append(df.shift(i))
+        names += [('var%d(t-%d)' % (j+1, i)) for j in range(n_vars)]
+    # forecast sequence (t, t+1, ... t+n)
+    for i in range(0, n_out):
+        cols.append(df_label.shift(-i))
+        if i == 0:
+            names += [('var%d(t)' % (j+1)) for j in range(n_vars_label)]
+        else:
+            names += [('var%d(t+%d)' % (j+1, i)) for j in range(n_vars_label)]
+    # put it all together
+    agg = concat(cols, axis=1)
+    agg.columns = names
+    return agg
+
+def create_time_series(xtrn, ytrn, xtst, ytst):
+    #combine for a universal set to follow machinelearningmastery tutorial
+    trainSet = np.append(xtrn, ytrn, axis=1)
+    testSet = np.append(xtst, ytst, axis=1)
+
+    # convert to csv to check
+    # xtrn_df = pd.DataFrame(xtrn[0:100])
+    # ytrn_df = pd.DataFrame(ytrn[0:100])
+    # train_df = pd.DataFrame(trainSet[0:100])
+    # xtrn_df.to_csv("xtrn.csv")
+    # ytrn_df.to_csv("ytrn.csv")
+    # train_df.to_csv("train.csv")
+
+    # data: x and y (all the data)
+    # labels: y (just the labels)
+
+    # scaler = MinMaxScaler(feature_range=(0,1))
+    # scaled_trainSet = scaler.fit_transform(trainSet)
+
+    #creates a (271088, 277 complete time series)
+    time_series_train = series_to_supervised(trainSet, ytrn, 1, 1);
+    time_series_test = series_to_supervised(testSet, ytst, 1, 1);
+
+    # first row doesnt have a t-1
+    time_series_train = time_series_train.drop(time_series_train.index[0])
+    time_series_test = time_series_test.drop(time_series_test.index[0])
+
+    # print(xtrn.shape)
+    # print(ytrn.shape)
+    # print(trainSet.shape)
+    # print(time_series_train.shape)
+
+    # convert to csv to check
+    # xtrn_df = pd.DataFrame(xtrn[0:100])
+    # ytrn_df = pd.DataFrame(ytrn[0:100])
+    # train_df = pd.DataFrame(trainSet[0:100])
+    # time_series_train_df = time_series_train[0:100]
+    # xtrn_df.to_csv("xtrn.csv")
+    # ytrn_df.to_csv("ytrn.csv")
+    # train_df.to_csv("train.csv")
+    # time_series_train_df.to_csv("time_series_train.csv")
+
+    time_series_train_np = time_series_train.values
+    time_series_test_np = time_series_test.values
+
+    train_X, train_Y = time_series_train_np[:, :-51], time_series_train_np[:,-51]
+    test_X, test_Y = time_series_test_np[:, :-51], time_series_test_np[:,-51]
+
+    # print(train_X.shape, train_Y.shape, test_X.shape, test_Y.shape)
+
+    train_X = train_X.reshape((train_X.shape[0], 1, train_X.shape[1]))
+    test_X = test_X.reshape((test_X.shape[0], 1, test_X.shape[1]))
+
+    # print(train_X.shape, train_Y.shape, test_X.shape, test_Y.shape)
+
+    train_X = 0
+    train_Y = 0
+    return (train_X, train_Y, test_X, test_Y)
+
+#
+# PROGRAM START 
+#
 data_dir = "extra_sensory_dataset/";
 puuid_features_dir = "ExtraSensory.per_uuid_features_labels/";
 
@@ -157,79 +243,34 @@ for idx,str in enumerate(all_uuids):
 print("Begin data loading")
 loaded_from_gz=False
 persistent_filenames = ["xtrn_persistent","ytrn_persistent","mtrn_persistent","xtst_persistent","ytst_persistent","mtst_persistent"]
-for fname in persistent_filenames:
+persistent_timeSeries = ["train_X", "train_Y", "test_X", "test_Y"]
+for fname in persistent_timeSeries:
     if not os.path.isfile(fname+".npy"):
         loaded_from_gz = True
-        break
-        
+        break      
+
+#if out of memory, do the training, and testing set seperately
 if loaded_from_gz:
-    print("loading from gx files")
+    print("loading from gz files")
     (xtrn,ytrn,mtrn,xtst,ytst,mtst) = create_train_test_set(data_dir + puuid_features_dir, all_uuids,test_uuids)
-    np.save(persistent_filenames[0], xtrn)
-    np.save(persistent_filenames[1], ytrn)
-    np.save(persistent_filenames[2], mtrn)
-    np.save(persistent_filenames[3], xtst)
-    np.save(persistent_filenames[4], ytst)
-    np.save(persistent_filenames[5], mtst)
+    # xtrn = np.load(persistent_filenames[0]+".npy")
+    # ytrn = np.load(persistent_filenames[1]+".npy")
+    # mtrn = np.load(persistent_filenames[2]+".npy")
+    # xtst = np.load(persistent_filenames[3]+".npy")
+    # ytst = np.load(persistent_filenames[4]+".npy")
+    # mtst = np.load(persistent_filenames[5]+".npy")
+    (train_X, train_Y, test_X, test_Y) = create_time_series(xtrn, ytrn, xtst, ytst)
+    np.save(persistent_timeSeries[0], train_X)
+    np.save(persistent_timeSeries[1], train_Y)
+    np.save(persistent_timeSeries[2], test_X)
+    np.save(persistent_timeSeries[3], test_Y)
 else:
     print("loading from presaved files")
-    xtrn = np.load(persistent_filenames[0]+".npy")
-    ytrn = np.load(persistent_filenames[1]+".npy")
-    mtrn = np.load(persistent_filenames[2]+".npy")
-    xtst = np.load(persistent_filenames[3]+".npy")
-    ytst = np.load(persistent_filenames[4]+".npy")
-    mtst = np.load(persistent_filenames[5]+".npy")
+    train_X = np.load(persistent_timeSeries[0]+".npy")
+    train_Y = np.load(persistent_timeSeries[1]+".npy")
+    test_X = np.load(persistent_timeSeries[2]+".npy")
+    test_Y = np.load(persistent_timeSeries[3]+".npy")
+    print(train_X.shape, train_Y.shape, test_X.shape, test_Y.shape)
 
-trainSet = np.append(xtrn, ytrn, axis=1)
-
-# convert to csv to check
-# xtrn_df = pd.DataFrame(xtrn[0:100])
-# ytrn_df = pd.DataFrame(ytrn[0:100])
-#train_df = pd.DataFrame(trainSet[0:100])
-# xtrn_df.to_csv("xtrn.csv")
-# ytrn_df.to_csv("ytrn.csv")
-#train_df.to_csv("train.csv")
-
-#data: x and y (all the data)
-#labels: y (just the labels)
-def series_to_supervised(data, labels, n_in=1, n_out=1):
-    n_vars = 1 if type(data) is list else data.shape[1]
-    n_vars_label = 1 if type(labels) is list else labels.shape[1]
-    df = DataFrame(data)
-    df_label = DataFrame(labels)
-    cols, names = list(), list()
-    # input sequence (t-n, ... t-1)
-    for i in range(n_in, 0, -1):
-        cols.append(df.shift(i))
-        names += [('var%d(t-%d)' % (j+1, i)) for j in range(n_vars)]
-    # forecast sequence (t, t+1, ... t+n)
-    for i in range(0, n_out):
-        cols.append(df_label.shift(-i))
-        if i == 0:
-            names += [('var%d(t)' % (j+1)) for j in range(n_vars_label)]
-        else:
-            names += [('var%d(t+%d)' % (j+1, i)) for j in range(n_vars_label)]
-    # put it all together
-    agg = concat(cols, axis=1)
-    agg.columns = names
-    return agg
-
-time_series_train = series_to_supervised(trainSet, ytrn, 1, 1);
-time_series_train = time_series_train.drop(time_series_train.index[0])
-
-print(xtrn.shape)
-print(ytrn.shape)
-print(trainSet.shape)
-print(time_series_train.shape)
-
-# convert to csv to check
-# xtrn_df = pd.DataFrame(xtrn[0:100])
-# ytrn_df = pd.DataFrame(ytrn[0:100])
-#train_df = pd.DataFrame(trainSet[0:100])
-time_series_train_df = time_series_train[0:100]
-# xtrn_df.to_csv("xtrn.csv")
-# ytrn_df.to_csv("ytrn.csv")
-#train_df.to_csv("train.csv")
-time_series_train_df.to_csv("time_series_train.csv")
 
 print("end data loading")

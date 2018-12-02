@@ -6,7 +6,7 @@ from keras.layers import LSTM
 
 # architect model
 lstm_model = keras.Sequential()
-lstm_model.add(LSTM(4, kernel_initializer='normal', activation='relu'))
+lstm_model.add(LSTM(4, input_shape(), kernel_initializer='normal', activation='relu'))
 lstm_model.add(Dense(51, kernel_initializer='normal', activation='sigmoid'))
 # Compile model
 lstm_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
