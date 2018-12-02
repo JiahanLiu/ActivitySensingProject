@@ -192,10 +192,10 @@ for key in mlp_models:
     model.fit(xtrn,ytrn, epochs=e, batch_size=b, callbacks=[metric])
     mlp_metrics[key] = metric
     
-    #with open(metric_dir + key + '.avg.metric.pkl', 'wb') as output:
-    #    pickle.dump(metric.get_data(), output, pickle.HIGHEST_PROTOCOL)
+    with open(metric_dir + key + '.avg.metric.pkl', 'wb') as output:
+        pickle.dump(metric.get_data(), output, pickle.HIGHEST_PROTOCOL)
         
-    #with open(metric_dir + key + '.det.metric.pkl', 'wb') as output:
-    #    pickle.dump(metric.get_detailed_data(), output, pickle.HIGHEST_PROTOCOL)
+    with open(metric_dir + key + '.det.metric.pkl', 'wb') as output:
+        pickle.dump(metric.get_detailed_data(), output, pickle.HIGHEST_PROTOCOL)
     
-    #model.save(model_dir + key + '.mdl')
+    model.save(model_dir + key + '.mdl')
