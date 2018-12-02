@@ -1,4 +1,4 @@
-import numpy as np;
+import numpy as np
 import os
 from keras.callbacks import Callback
 from extrasensory_lib import *
