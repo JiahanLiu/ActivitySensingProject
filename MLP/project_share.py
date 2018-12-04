@@ -123,7 +123,7 @@ class Project_Metrics(Callback):
     def get_detailed_data(self):
         return self._detailed_data
 
-data_dir = "extra_sensory_dataset/";
+data_dir = "../../../extra_sensory_dataset/";
 puuid_features_dir = "ExtraSensory.per_uuid_features_labels/";
 
 #a common test set (size is 16 of 56)
