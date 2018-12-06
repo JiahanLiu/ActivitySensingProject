@@ -42,7 +42,7 @@ def create_train_test_set(prefix_dir,uuids,tuuids):
     m_tst = np.empty((0,51))
 
     for uuid in uuids:
-        if uuid = '':
+        if uuid == '':
             continue
         (X,Y,M,q,feature_names,label_names) = read_user_data(prefix_dir + uuid);
         #print(feature_names)
