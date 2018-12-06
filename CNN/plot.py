@@ -13,7 +13,7 @@ codeFilename = "bacc_metric_simple.pkl";
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
-with open(os.path.join(dirs, codeFilename), 'rb') as input:  # Overwrites any existing file.
+with open(os.path.join(codeFilename), 'rb') as input:  # Overwrites any existing file.
 	metric_simple = pickle.load(input)
 	i = 1
 	single_run_x = []

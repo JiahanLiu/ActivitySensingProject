@@ -9,11 +9,15 @@ model_dir = "./models/"
 metric_dir = "./metrics/"
 #create models
 mlp_1_32 = keras.Sequential()
-
 mlp_1_32.add(keras.layers.Dense(32, input_dim=mlp_input_dim, kernel_initializer='normal', activation='relu'))
 mlp_1_32.add(keras.layers.Reshape((4,8),input_shape=(32,)))
-mlp_1_32.add(keras.layers.Conv1D(16, 4, activation='relu', input_shape=(2,8)))
+mlp_1_32.add(keras.layers.Conv1D(16, 4, activation='relu', input_shape=(4,8)))
+mlp_1_32.add(keras.layers.Flatten())
 mlp_1_32.add(keras.layers.Dense(51, kernel_initializer='normal', activation='sigmoid'))
+# mlp_1_32.add(keras.layers.Dense(32, input_dim=mlp_input_dim, kernel_initializer='normal', activation='relu'))
+# mlp_1_32.add(keras.layers.Reshape((4,8),input_shape=(32,)))
+# mlp_1_32.add(keras.layers.Conv1D(16, 4, activation='relu', input_shape=(2,8)))
+# mlp_1_32.add(keras.layers.Dense(51, kernel_initializer='normal', activation='sigmoid'))
 
 
 mlp_models = {
@@ -66,14 +70,14 @@ def build_masked_loss(loss_function, mask_value=MASK_VALUE):
 
     return masked_loss_function
 
-def open_metric(mdl_name):
-    avg = []
-    det = []
-    with open(metric_dir + mdl_name + '.avg.metric.pkl', 'rb') as fd:
-        avg = pickle.load(fd)
-    with open(metric_dir + mdl_name + '.det.metric.pkl', 'rb') as fd:
-        det = pickle.load(fd)
-    return (avg, det)
+# def open_metric(mdl_name):
+#     avg = []
+#     det = []
+#     with open(metric_dir + mdl_name + '.avg.metric.pkl', 'rb') as fd:
+#         avg = pickle.load(fd)
+#     with open(metric_dir + mdl_name + '.det.metric.pkl', 'rb') as fd:
+#         det = pickle.load(fd)
+#     return (avg, det)
 
 
 
@@ -87,19 +91,16 @@ mlp_1_32.compile(loss=build_masked_loss(keras.losses.categorical_crossentropy, M
 #b:500
 #e:400
 b = 100
-e = 10
+e = 100
 
-mlp_1_32.fit(xtrn,ytrn, epochs=e, batch_size=b, callbacks=[mlp_1_32_metrics])
+bacc_metric = Project_Metrics(mtst)
+history = mlp_1_32.fit(xtrn,ytrn, epochs=e, batch_size=b, callbacks=[bacc_metric])
+print(bacc_metric.get_data())
 
-print(mlp_1_32_metrics.get_data())
-
+mlp_1_32.save('lstm_step1_prevonly_lstm1.h5')  # creates a HDF5 file 'lstm_basic.h5'
 with open('bacc_metric_simple.pkl', 'wb') as output:  # Overwrites any existing file.
-    pickle.dump(mlp_1_32_metrics.get_data(), output, pickle.HIGHEST_PROTOCOL)
-    
+    pickle.dump(bacc_metric.get_data(), output)
 with open('bacc_metric_detailed.pkl', 'wb') as output:  # Overwrites any existing file.
-    pickle.dump(mlp_1_32_metrics.get_detailed_data(), output, pickle.HIGHEST_PROTOCOL)
-
-
-
+    pickle.dump(bacc_metric.get_detailed_data(), output)
 
     
