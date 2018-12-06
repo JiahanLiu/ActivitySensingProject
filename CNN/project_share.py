@@ -42,6 +42,8 @@ def create_train_test_set(prefix_dir,uuids,tuuids):
     m_tst = np.empty((0,51))
 
     for uuid in uuids:
+        if uuid = '':
+            continue
         (X,Y,M,q,feature_names,label_names) = read_user_data(prefix_dir + uuid);
         #print(feature_names)
         sense_feature_names = get_sensor_names_from_features(feature_names)
@@ -123,7 +125,7 @@ class Project_Metrics(Callback):
     def get_detailed_data(self):
         return self._detailed_data
 
-data_dir = "../../../extra_sensory_dataset/";
+data_dir = "../extra_sensory_dataset/";
 puuid_features_dir = "ExtraSensory.per_uuid_features_labels/";
 
 #a common test set (size is 16 of 56)
