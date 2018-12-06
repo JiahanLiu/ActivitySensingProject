@@ -11,7 +11,7 @@ lstm_model = Sequential()
 lstm_model.add(LSTM(30, return_sequences=True, input_shape=(train_X.shape[1], train_X.shape[2]), kernel_initializer='normal', activation='relu'))
 lstm_model.add(LSTM(30, return_sequences=True, input_shape=(train_X.shape[1], train_X.shape[2]), kernel_initializer='normal', activation='relu'))
 lstm_model.add(LSTM(30, input_shape=(train_X.shape[1], train_X.shape[2]), kernel_initializer='normal', activation='relu'))
-lstm_model_add(Dropout(0.2))
+lstm_model.add(Dropout(0.2))
 lstm_model.add(Dense(51, kernel_initializer='normal', activation='sigmoid'))
 # Compile model
 lstm_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
