@@ -23,7 +23,7 @@ with open(os.path.join(codeFilename), 'rb') as input:  # Overwrites any existing
 		single_run_y.append(x[3])
 		i = i + 1
 
-ax.set_ylabel('balanced accuracy', fontsize='medium')
-ax.set_xlabel('epochs', fontsize='medium')
+plt.xlabel('F1')
+plt.ylabel('F2')
 ax.scatter(x=single_run_x, y=single_run_y, label='linear')
 fig.savefig('test.png')
