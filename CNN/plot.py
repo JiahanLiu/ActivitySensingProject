@@ -22,6 +22,8 @@ with open(os.path.join(codeFilename), 'rb') as input:  # Overwrites any existing
 		single_run_x.append(i)
 		single_run_y.append(x[3])
 		i = i + 1
-		
+
+ax.set_ylabel('balanced accuracy')
+ax.set_xlabel('epochs')
 ax.scatter(x=single_run_x, y=single_run_y, label='linear')
 fig.savefig('test.png')
