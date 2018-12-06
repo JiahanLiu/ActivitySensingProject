@@ -14,7 +14,7 @@ mlp_1_32 = keras.Sequential()
 linear.add(keras.layers.Dense(51, input_dim=mlp_input_dim, kernel_initializer='normal', activation='sigmoid'))
 
 mlp_1_32.add(keras.layers.Dense(32, input_dim=mlp_input_dim, kernel_initializer='normal', activation='relu'))
-mlp_1_32.add(keras.layers.Reshape((4,4),input_shape=(32,)))
+mlp_1_32.add(keras.layers.Reshape((4,8),input_shape=(32,)))
 mlp_1_32.add(keras.layers.Conv1D(16, 4, activation='relu', input_shape=(2,8)))
 mlp_1_32.add(keras.layers.Dense(51, kernel_initializer='normal', activation='sigmoid'))
 
@@ -98,8 +98,8 @@ if run:
     #originally tested with
     #b:500
     #e:400
-    b = 500
-    e = 400
+    b = 100
+    e = 10
 
     for key in mlp_models:
         model = mlp_models[key]
