@@ -10,9 +10,6 @@ for dirs in allFilesInDir:
 
 codeFilename = "bacc_metric_simple.pkl";
 
-fig = plt.figure()
-ax = fig.add_subplot(111)
-
 for dirs in subdirs:
 	with open(os.path.join(dirs, codeFilename), 'rb') as input:  # Overwrites any existing file.
 		metric_simple = pickle.load(input)
@@ -23,7 +20,9 @@ for dirs in subdirs:
 			single_run_x.append(i)
 			single_run_y.append(x[3])
 			i = i + 1
-
+			
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
 	plt.xlabel('epoch')
 	plt.ylabel('balanced accuracy')		
 	ax.scatter(x=single_run_x, y=single_run_y, label='linear')
