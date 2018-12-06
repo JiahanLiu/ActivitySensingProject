@@ -8,10 +8,7 @@ mlp_input_dim = 175
 model_dir = "./models/"
 metric_dir = "./metrics/"
 #create models
-linear = keras.Sequential()
 mlp_1_32 = keras.Sequential()
-
-linear.add(keras.layers.Dense(51, input_dim=mlp_input_dim, kernel_initializer='normal', activation='sigmoid'))
 
 mlp_1_32.add(keras.layers.Dense(32, input_dim=mlp_input_dim, kernel_initializer='normal', activation='relu'))
 mlp_1_32.add(keras.layers.Reshape((4,8),input_shape=(32,)))
@@ -20,15 +17,12 @@ mlp_1_32.add(keras.layers.Dense(51, kernel_initializer='normal', activation='sig
 
 
 mlp_models = {
-"linear"                : linear,
 "mlp_1_32"              : mlp_1_32,
 }
 
-linear_metrics              = Project_Metrics(mtst)
 mlp_1_32_metrics            = Project_Metrics(mtst)
 
 mlp_metrics = {
-"linear"                : linear_metrics,
 "mlp_1_32"              : mlp_1_32_metrics,
 }
 """
@@ -82,38 +76,30 @@ def open_metric(mdl_name):
     return (avg, det)
 
 
-run = True
-print("am I running?")
-print(run)
-if run:
-    #compile models
-    for key in mlp_models:
-        model = mlp_models[key]
-        model.compile(loss=build_masked_loss(keras.losses.categorical_crossentropy, MASK_VALUE), optimizer='adam')
 
-    # epochs : batch : est_time
-    # 100 : 10000 : 3h (6s/e)
-    # 100 : 1000  : 4h (8s/e)
-    # 100 : 100   : 13h(26s/e)
-    #originally tested with
-    #b:500
-    #e:400
-    b = 100
-    e = 10
+mlp_1_32.compile(loss=build_masked_loss(keras.losses.categorical_crossentropy, MASK_VALUE), optimizer='adam')
 
-    for key in mlp_models:
-        model = mlp_models[key]
-        metric = mlp_metrics[key]
-        
-        print("training " + key)
-        
-        model.fit(xtrn,ytrn, epochs=e, batch_size=b, callbacks=[metric])
-        mlp_metrics[key] = metric
-        
-        with open(metric_dir + key + '.avg.metric.pkl', 'wb') as output:
-            pickle.dump(metric.get_data(), output, pickle.HIGHEST_PROTOCOL)
-            
-        with open(metric_dir + key + '.det.metric.pkl', 'wb') as output:
-            pickle.dump(metric.get_detailed_data(), output, pickle.HIGHEST_PROTOCOL)
-        
-        model.save(model_dir + key + '.mdl')
+# epochs : batch : est_time
+# 100 : 10000 : 3h (6s/e)
+# 100 : 1000  : 4h (8s/e)
+# 100 : 100   : 13h(26s/e)
+#originally tested with
+#b:500
+#e:400
+b = 100
+e = 10
+
+mlp_1_32.fit(xtrn,ytrn, epochs=e, batch_size=b, callbacks=[mlp_1_32_metrics])
+
+print(mlp_1_32_metrics.get_data())
+
+with open('bacc_metric_simple.pkl', 'wb') as output:  # Overwrites any existing file.
+    pickle.dump(mlp_1_32_metrics.get_data(), output, pickle.HIGHEST_PROTOCOL)
+    
+with open('bacc_metric_detailed.pkl', 'wb') as output:  # Overwrites any existing file.
+    pickle.dump(mlp_1_32_metrics.get_detailed_data(), output, pickle.HIGHEST_PROTOCOL)
+
+
+
+
+    
