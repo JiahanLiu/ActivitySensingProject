@@ -35,7 +35,8 @@ mlp_5_64_32_16_32_64 = keras.Sequential()
 #mlp_1_256.add(keras.layers.Dense(51, input_dim=mlp_input_dim, kernel_initializer='normal', activation='sigmoid'))
 
 mlp_2_16_16.add(keras.layers.Dense(16, input_dim=mlp_input_dim, kernel_initializer='normal', activation='relu'))
-mlp_2_16_16.add(keras.layers.Dense(16, input_dim=mlp_input_dim, kernel_initializer='normal', activation='relu'))
+mlp_2_16_16.add(keras.layers.Reshape((2,8),input_shape=(16,)))
+mlp_2_16_16.add(keras.layers.Conv1d(16, 2, activation='relu', input_shape=(2,8)))
 mlp_2_16_16.add(keras.layers.Dense(51, input_dim=mlp_input_dim, kernel_initializer='normal', activation='sigmoid'))
 
 mlp_2_8_16.add(keras.layers.Dense(8, input_dim=mlp_input_dim, kernel_initializer='normal', activation='relu'))
