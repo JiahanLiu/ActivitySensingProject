@@ -110,14 +110,14 @@ class Project_Metrics(Callback):
         self._detailed_data = []
         self.validation_data = [xtst,ytst]
 
-    def on_epoch_end(self, batch, logs={}):
-        xval = self.validation_data[0]
-        yval = self.validation_data[1]
-        yval = yval.astype(int)
-        ypre = np.asarray(self.model.predict(xval).round()).astype(int)
-        (acc,sens,spec,bacc)=Project_Metrics.metric_calc(self,yval, self.test_mask,ypre)
-        self._data.append([acc.mean(),sens.mean(),spec.mean(),bacc.mean()])
-        self._detailed_data.append([acc,sens,spec,bacc])
+    # def on_epoch_end(self, batch, logs={}):
+    #     xval = self.validation_data[0]
+    #     yval = self.validation_data[1]
+    #     yval = yval.astype(int)
+    #     ypre = np.asarray(self.model.predict(xval).round()).astype(int)
+    #     (acc,sens,spec,bacc)=Project_Metrics.metric_calc(self,yval, self.test_mask,ypre)
+    #     self._data.append([acc.mean(),sens.mean(),spec.mean(),bacc.mean()])
+    #     self._detailed_data.append([acc,sens,spec,bacc])
         
     def get_data(self):
         return self._data
