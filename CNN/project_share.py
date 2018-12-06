@@ -82,7 +82,7 @@ class Project_Metrics(Callback):
     def __init__(self, test_mask):
         self.test_mask = test_mask
         
-    def metric_calc(val, valmask, pre):
+    def metric_calc(self,val, valmask, pre):
         m=valmask
         val = val.astype(bool)
         pre = pre.astype(bool)
@@ -115,7 +115,7 @@ class Project_Metrics(Callback):
         yval = self.validation_data[1]
         yval = yval.astype(int)
         ypre = np.asarray(self.model.predict(xval).round()).astype(int)
-        (acc,sens,spec,bacc)=Project_Metrics.metric_calc(yval, self.test_mask,ypre)
+        (acc,sens,spec,bacc)=Project_Metrics.metric_calc(self,yval, self.test_mask,ypre)
         self._data.append([acc.mean(),sens.mean(),spec.mean(),bacc.mean()])
         self._detailed_data.append([acc,sens,spec,bacc])
         
